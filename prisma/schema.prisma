@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  discordId     String   @unique
+  username      String
+  displayName   String?
+  avatar        String?
+  banner        String?
+  accentColor   Int?
+  bio           String?
+  pronouns      String?
+  joinedAt      DateTime @default(now())
+  lastSeen      DateTime @updatedAt
+  isBotOwner    Boolean  @default(false)
+  isBlacklisted Boolean  @default(false)
+  isWhitelisted Boolean  @default(false)
+  whitelistedBy String?
+
+  logs       Log[]
+  activities UserActivity[]
+  badges     UserBadge[]
+  sessions   UserSession[]
+
+  @@map("users")
+}
+
+model UserSettings {
+  id       String @id @default(cuid())
+  userId   String @unique
+  locale   String @default("en-US")
+  timezone String @default("UTC")
+  dmPings  Boolean @default(true)
+  privacy  Boolean @default(false)
+
+  @@map("user_settings")
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId  String
+  name     String
+  iconUrl  String?
+  obtained DateTime @default(now())
+
+  @@map("user_badges")
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@map("user_activities")
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("user_sessions")
+}
+
+model Guild {
+  id            String   @id @default(cuid())
+  discordId     String   @unique
+  name          String
+  icon          String?
+  ownerId       String?
+  memberCount   Int      @default(0)
+  joinedAt      DateTime @default(now())
+  isPremium     Boolean  @default(false)
+  isBlacklisted Boolean  @default(false)
+
+  logs           Log[]
+  customCommands CustomCommand[]
+
+  @@map("guilds")
+}
+
+model GuildSettings {
+  id              String  @id @default(cuid())
+  guildId         String  @unique
+  prefix          String  @default("/")
+  locale          String  @default("en-US")
+  loggingChannel  String?
+  logLevels       String  @default("all")
+  mutedRoleId     String?
+  autoModEnabled  Boolean @default(false)
+  welcomeChannel  String?
+  snipeEnabled    Boolean @default(true)
+
+  @@map("guild_settings")
+}
+
+model CustomCommand {
+  id         String   @id @default(cuid())
+  guildId    String
+  guild      Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  name       String
+  response   String
+  aliases    String[]
+  cooldown   Int      @default(0)
+  usageCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([guildId, name])
+  @@map("custom_commands")
+}
+
+model Whitelist {
+  id          String   @id @default(cuid())
+  discordId   String   @unique
+  addedBy     String
+  reason      String?
+  role        String   @default("vip")
+  permissions String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("whitelist")
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guildId   String?
+  guild     Guild?   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  type      String
+  action    String
+  details   Json?
+  severity  String   @default("info")
+  timestamp DateTime @default(now())
+
+  @@map("logs")
+}
+
+model CommandStat {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String?
+  guildId   String?
+  duration  Int?
+  success   Boolean  @default(true)
+  error     String?
+  timestamp DateTime @default(now())
+
+  @@map("command_stats")
+}
+
+model GlobalSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+
+  @@map("global_settings")
+}
+
+model Infraction {
+  id        String   @id @default(cuid())
+  userId    String
+  guildId   String
+  type      String
+  reason    String?
+  duration  Int?
+  moderator String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  @@map("infractions")
+}
