@@ -15,8 +15,8 @@ STATUS_COLORS = {
     "offline": 0x808080,
 }
 
-# DIRECT Imgur banner - replace if needed
-DEFAULT_BANNER = "https://i.imgur.com/wDoZKcV.jpg"  # Try this; adjust extension if needed (.png/.gif)
+# DIRECT Imgur banner for users without banner
+DEFAULT_BANNER = "https://i.imgur.com/wDoZKcV.jpg"  # Update if needed (use direct i.imgur.com link)
 
 
 def is_whitelisted():
@@ -146,7 +146,7 @@ class UtilityCog(commands.Cog):
         if user.banner:
             banner_url = user.banner.replace(size=4096, format="gif" if user.banner.is_animated() else "png")
         else:
-            banner_url = DEFAULT_BANNER  # Custom default banner
+            banner_url = DEFAULT_BANNER  # Your custom banner
 
         created_ts = int(user.created_at.timestamp())
 
@@ -193,13 +193,10 @@ class UtilityCog(commands.Cog):
         embed.set_thumbnail(url=str(avatar_url))
         embed.set_footer(text=f"{self.bot.user.name} \u00b7 {user.id}", icon_url="https://img.icons8.com/ios-filled/512/ffffff/discord.png")
 
-        if banner_url:
-            embed.set_image(url=str(banner_url))
-            files = []
-        else:
-            files = []
+        embed.set_image(url=str(banner_url))
+        files = []
 
-        return embed, files, bool(banner_url)
+        return embed, files, True
 
     def _get_badge_emojis(self, badges):
         badge_line = ""
@@ -209,7 +206,6 @@ class UtilityCog(commands.Cog):
                 badge_line += "\u2b50"
             elif badge_id == "hypesquad_house_2":
                 badge_line += "\u1f1fa8"
-            # ... (keeping rest of badges)
             elif badge_id in ["guild_booster", "guild_booster_lvl1", "guild_booster_lvl2", "guild_booster_lvl3", "guild_booster_lvl4", "guild_booster_lvl5", "guild_booster_lvl6", "guild_booster_lvl7", "guild_booster_lvl8"]:
                 badge_line += "\ud83d\udce1"
             elif badge_id == "early_supporter":
