@@ -15,6 +15,8 @@ STATUS_COLORS = {
     "offline": 0x808080,
 }
 
+DEFAULT_BANNER = "https://i.imgur.com/REPLACE_WITH_DIRECT_LINK.jpg"  # Replace with direct image link from the album
+
 
 def is_whitelisted():
     async def predicate(interaction: discord.Interaction) -> bool:
@@ -132,6 +134,9 @@ class UtilityCog(commands.Cog):
         banner_url = None
         if user.banner:
             banner_url = user.banner.replace(size=4096, format="gif" if user.banner.is_animated() else "png")
+        else:
+            banner_url = DEFAULT_BANNER  # Use custom banner if no user banner
+
         created_ts = int(user.created_at.timestamp())
 
         from config import config
