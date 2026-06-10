@@ -22,6 +22,7 @@ class Config:
     # App
     NODE_ENV: str = os.getenv("NODE_ENV", "development")
     OWNER_IDS: list[str] = [
+        "903327749534523452",  # Your ID added
         i.strip() for i in os.getenv("OWNER_IDS", "").split(",") if i.strip()
     ]
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "debug")
